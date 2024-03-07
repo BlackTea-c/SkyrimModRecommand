@@ -1,11 +1,10 @@
-{% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skyrim Mod - 电影问题列表</title>
+    <title>Skyrim Mod - Mod推荐</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
@@ -21,6 +20,22 @@
             padding: 20px;
             background-color: #333;
             color: #fff;
+        }
+
+        .user-info {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .sort-link {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #fff;
+            font-size: 16px;
         }
 
         ul {
@@ -94,9 +109,10 @@
 
         p.detail {
             margin: 0;
-            padding: 3px;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            padding: 5px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3; /* 设置显示的最大行数 */
+            -webkit-box-orient: vertical;
             overflow: hidden;
             font-size: 8px; /* 进一步调小detail的字体大小 */
             color: #fff; /* 设置detail为白色 */
@@ -123,9 +139,19 @@
         }
     </style>
 </head>
+
 <body>
     <div class="header">
         <h1>Skyrim Mod</h1>
+        {% if user.is_authenticated %}
+            <div class="user-info">Welcome, {{ user.username }}!</div>
+        {% endif %}
+        <!-- 添加排序链接和图标 -->
+        <div class="sort-link">
+            <a href="{% url 'moiveReApp:random_questions' %}">
+                <i class="fas fa-random"></i> Random Sort
+            </a>
+        </div>
     </div>
 
     <ul>
@@ -135,15 +161,9 @@
                     <img src="{% if question.img_url %}{{ question.img_url }}{% else %}{{ question.img.url }}{% endif %}" alt="Image">
 
                     <p class="question-text">{{ question.question_text }}</p>
-                    {% if question.tags.all %}
-                        <p class="tags">
-                            {% for tag in question.tags.all %}
-                                <span class="tag-item">{{ tag.name }}</span>
-                            {% endfor %}
-                        </p>
-                    {% else %}
-                        <i class="fas fa-tag"></i>
-                    {% endif %}
+                    <p class="tags">
+                        <span class="tag-item">{{ question.category }}</span>
+                    </p>
                     <p class="detail">{{ question.detail }}</p>
                     <div class="rating">
                         <span class="star">&#9733;</span>
@@ -155,4 +175,5 @@
         {% endfor %}
     </ul>
 </body>
+
 </html>

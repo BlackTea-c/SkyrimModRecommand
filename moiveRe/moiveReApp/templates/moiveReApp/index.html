@@ -132,7 +132,8 @@
         {% for question in latest_question_list %}
             <li>
                 <a href="{% url 'moiveReApp:question_detail' question.id %}">
-                    <img src="{{ question.img.url }}" alt="Image">
+                    <img src="{% if question.img_url %}{{ question.img_url }}{% else %}{{ question.img.url }}{% endif %}" alt="Image">
+
                     <p class="question-text">{{ question.question_text }}</p>
                     {% if question.tags.all %}
                         <p class="tags">

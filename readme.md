@@ -7,3 +7,15 @@
 
 现在的话直接下载到本地cd到moiveRe文件夹然后去终端python manage.py runsever就行了
 具体操作代码看django。
+
+
+3/7 成功爬取了100多组数据，期间有个问题就是
+# 设置环境变量，指向你的Django项目的settings模块
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'moiveRe.settings')
+
+# 配置Django
+django.setup()
+
+这个一直报错找不到moiveRe.settings
+
+原因是一定要把py文件放在moiveRe根目录下面。要不就识别不到。

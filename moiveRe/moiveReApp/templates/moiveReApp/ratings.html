@@ -32,6 +32,16 @@
             margin-bottom: 20px;
         }
 
+        h1 a {
+            color: #61dafb;
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        h1 a:hover {
+            color: #4fa3d1;
+        }
+
         img {
             max-width: 100%;
             height: auto;
@@ -79,7 +89,7 @@
 <body>
     <div class="container">
         <img src="{% if question.img_url %}{{ question.img_url }}{% else %}{{ question.img.url }}{% endif %}" alt="Image">
-        <h1>{{ question.question_text }}</h1>
+        <h1><a href="{{ question.link }}" target="_blank">查看详情</a></h1>
 
         <h2>我要评分</h2>
         <form method="post" action="{% url 'moiveReApp:question_detail' question_id=question.id %}">

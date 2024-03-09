@@ -14,7 +14,7 @@ import csv
 from datetime import datetime
 from django.db import models
 from moiveReApp.models import Question
-csv_file_path = 'mod_data.csv'
+csv_file_path = 'mod_data1.csv'
 questions_to_create = []
 with open(csv_file_path, mode='r', encoding='utf-8') as csv_file:
     csv_reader = csv.DictReader(csv_file)

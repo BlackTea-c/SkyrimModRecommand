@@ -6,6 +6,7 @@ from django.db import models
 import datetime
 from django.utils import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.contrib.auth.models import User
 
 class Tag(models.Model):
     name = models.CharField(max_length=200)
@@ -23,6 +24,9 @@ class Question(models.Model):
     link = models.CharField(max_length=200,default='http://127.0.0.1:8000/moiveReApp/')
     detail = models.CharField(max_length=600,default=' ')
     pub_date = models.DateTimeField("date published")
+
+    likes = models.PositiveIntegerField(default=0)
+    liked_by = models.ManyToManyField(User, blank=True, related_name='liked_questions')
     def __str__(self):
         return f"{self.question_text} - {self.img.url}"
 
@@ -45,8 +49,6 @@ class Question(models.Model):
             avg = ratings.aggregate(models.Avg('value'))['value__avg']
             return round(avg, 1)
         return None
-
-
 
 
 class Rating(models.Model):

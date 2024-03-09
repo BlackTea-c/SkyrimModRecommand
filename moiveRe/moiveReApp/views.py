@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.http import HttpResponse
 
 # Create your views here.
 from django.views import generic
@@ -7,6 +8,8 @@ from django.db.models import Avg
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Question, Rating
 import random
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
 
 
 class IndexView(generic.ListView):
@@ -71,6 +74,29 @@ def random_questions(request):
     random_questions = random.sample(list(all_questions), min(20, len(all_questions)))
 
     return render(request, 'moiveReApp/randomsort.html', {'random_questions': random_questions})
+
+
+@login_required
+def like_question(request, question_id):
+    question = get_object_or_404(Question, id=question_id)
+
+    if request.user in question.liked_by.all():
+        # 用户已经点过赞，取消点赞
+        question.liked_by.remove(request.user)
+        if question.likes>0:
+           question.likes-=1
+    else:
+        # 用户还未点赞，添加点赞
+        question.liked_by.add(request.user)
+        question.likes += 1
+
+    question.save()
+
+    # 获取请求的来源URL，如果没有则默认重定向到首页
+    redirect_url = request.META.get('HTTP_REFERER', 'moiveReApp:index')
+
+    # 重定向到来源页面
+    return redirect(redirect_url)
 
 
 

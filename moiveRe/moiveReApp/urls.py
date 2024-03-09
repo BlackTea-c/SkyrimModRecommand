@@ -7,7 +7,7 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.static import serve
 from .views import question_detail
-from .views import register, user_login,random_questions
+from .views import register, user_login,random_questions,like_question
 
 app_name = "moiveReApp"
 urlpatterns = [
@@ -15,6 +15,7 @@ urlpatterns = [
     path('register/', register, name='register'),
     path('login/', user_login, name='user_login'),
     path('randomsort/', random_questions, name='random_questions'),
+    path('like/<int:question_id>/', like_question, name='like_question'),
 
     path('<int:question_id>/ratings/', question_detail, name='question_detail'),
 

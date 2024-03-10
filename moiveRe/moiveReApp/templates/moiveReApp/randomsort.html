@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skyrim Mod - 随机Mod推荐</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background-color: #333;
+            color: #fff;
+        }
+
+        .user-info {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            text-align: center;
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        li {
+            margin: 0 10px 20px 10px;
+            text-align: center;
+            width: 250px;
+            background-color: #2d2d2d;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        li:hover {
+            transform: translateY(-5px);
+        }
+
+        img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        a {
+            text-decoration: none;
+            color: #3498db;
+            display: block;
+            padding: 10px;
+        }
+
+        p.question-text {
+            margin: 0;
+            padding: 10px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff; /* 设置question_text为白色 */
+        }
+
+        p.tags {
+            margin: 0;
+            padding: 5px;
+            font-size: 12px; /* 调小标签文字大小 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        span.tag-item {
+            background-color: #3498db; /* 标签框填充颜色 */
+            color: #fff; /* 白色文字 */
+            border-radius: 5px; /* 圆角框 */
+            padding: 3px 8px; /* 调整内边距 */
+            margin: 2px; /* 调整外边距 */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+        }
+
+        p.detail {
+            margin: 0;
+            padding: 5px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3; /* 设置显示的最大行数 */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            font-size: 8px; /* 进一步调小detail的字体大小 */
+            color: #fff; /* 设置detail为白色 */
+        }
+
+        .rating {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #f39c12;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+
+        .star {
+            margin-right: 3px;
+        }
+
+        p.pub-date {
+            margin: 0;
+            padding: 5px;
+            font-size: 12px;
+            color: #95a5a6;
+
+        }
+         .like-button {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            cursor: pointer;
+            color: #f39c12;
+            font-size: 24px;
+        }
+
+        .like-button i {
+            transition: color 0.3s, transform 0.5s;
+        }
+
+        .like-button.liked i {
+            color: #ff6b6b;
+            transform: scale(1.5);
+        }
+
+        .firework {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background-color: #ff6b6b;
+            border-radius: 50%;
+            animation: explode 0.5s ease-out;
+            transform: translate(60%, -150%);
+        }
+
+        @keyframes explode {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>Skyrim Mod</h1>
+        {% if user.is_authenticated %}
+            <div class="user-info">Welcome, {{ user.username }}!</div>
+        {% endif %}
+    </div>
+
+    <h1>随机Mod推荐</h1>
+
+    <ul>
+        {% for question in random_questions %}
+            <li>
+                <a href="{% url 'moiveReApp:question_detail' question.id %}">
+                    <img src="{% if question.img_url %}{{ question.img_url }}{% else %}{{ question.img.url }}{% endif %}" alt="Image">
+
+                    <p class="question-text">{{ question.question_text }}</p>
+                    <p class="tags">
+                        <span class="tag-item">{{ question.category }}</span>
+                    </p>
+                    <p class="detail">{{ question.detail }}</p>
+                    <div class="rating">
+                        <span class="star">&#9733;</span>
+                        {{ question.avg_rating|default:5|floatformat:1 }}/5
+                    </div>
+                    <p class="pub-date">发布日期: {{ question.pub_date|date:"F d, Y" }}</p>
+                    <form action="{% url 'moiveReApp:like_question' question.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="like-button">
+                            {% if user.is_authenticated and user in question.liked_by.all %}
+                                <i class="fas fa-heart liked"></i>
+                            {% else %}
+                                <i class="far fa-heart"></i>
+                            {% endif %}
+                            <div class="firework"></div>
+                        </button>
+                    </form>
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.like-button').click(function () {
+                var fireworks = $('<div class="firework"></div>');
+                $(this).append(fireworks);
+                setTimeout(() => {
+                    fireworks.remove();
+                }, 500);
+            });
+        });
+    </script>
+</body>
+
+</html>

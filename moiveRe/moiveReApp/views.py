@@ -12,6 +12,7 @@ from django.contrib.auth import login, authenticate
 from django.shortcuts import render, redirect
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+import math
 
 class IndexView(generic.ListView):
     template_name = "moiveReApp/index.html"
@@ -73,11 +74,41 @@ class usercf_():
             user_item_matrix[user_index, item_index] = 1  # 表示用户喜欢该物品
 
     return user_item_matrix, item_dict, user_dict
+
   def calculate_user_similarity(user_item_matrix):
-    # 计算用户相似度矩阵
-    user_similarity_matrix = cosine_similarity(user_item_matrix)
-    np.fill_diagonal(user_similarity_matrix, 0)
-    return user_similarity_matrix
+      # 构建物品到用户的倒排表
+      item_users = {}
+      for u, items in enumerate(user_item_matrix):
+          for i in range(len(items)):
+              if items[i] == 1:
+                  if i not in item_users:
+                      item_users[i] = set()
+                  item_users[i].add(u)
+
+      # 计算共同交互物品数的对数惩罚的用户相似度矩阵
+      C = {u: {v: 0 for v in range(len(user_item_matrix))} for u in range(len(user_item_matrix))}
+      N = {u: 0 for u in range(len(user_item_matrix))}
+
+      for i, users in item_users.items():
+          for u in users:
+              N[u] += 1
+              for v in users:
+                  if u == v:
+                      continue
+                  C[u][v] += 1 / math.log(1 + len(users))
+
+      # 计算最终的用户相似度矩阵
+      W = {u: {v: 0 for v in range(len(user_item_matrix))} for u in range(len(user_item_matrix))}
+
+      for u, related_users in C.items():
+          for v, cuv in related_users.items():
+              W[u][v] = cuv / math.sqrt(N[u] * N[v])
+
+      # 将字典形式的相似度矩阵转换为 NumPy 数组
+      user_ids = list(W.keys())
+      user_similarity_matrix_array = np.array([[W[u][v] for v in user_ids] for u in user_ids])
+
+      return user_similarity_matrix_array
   def generate_recommendations(target_user, user_similarity_matrix, user_item_matrix, user_dict, item_dict, k):
     """
     为目标用户生成推荐列表
@@ -217,9 +248,9 @@ def usercf(request):
     # 构建用户-物品交互矩阵等
     user_item_matrix, item_dict, user_dict = usercf_.build_user_item_matrix(question_list)
     user_similarity_matrix = usercf_.calculate_user_similarity(user_item_matrix)
-
+    #print(user_similarity_matrix)
     # 生成推荐列表
-    recommendations = usercf_.generate_recommendations(current_user_id, user_similarity_matrix, user_item_matrix, user_dict, item_dict, k=1)
+    recommendations = usercf_.generate_recommendations(current_user_id, user_similarity_matrix, user_item_matrix, user_dict, item_dict, k=8)
     # 获取推荐的电影信息
     recommended_movies = Question.objects.filter(id__in=recommendations[:8]) #只展示前五个
 

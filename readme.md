@@ -19,3 +19,7 @@ django.setup()
 这个一直报错找不到moiveRe.settings
 
 原因是一定要把py文件放在moiveRe根目录下面。要不就识别不到。
+
+
+
+3/11  实现了Usercf并且实时更新。

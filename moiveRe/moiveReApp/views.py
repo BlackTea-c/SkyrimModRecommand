@@ -156,7 +156,7 @@ class usercf_():
 
     # 根据感兴趣程度排序推荐列表
     recommendations.sort(key=lambda x: x[1], reverse=True)
-    print(recommendations)
+    #print(recommendations)
 
     # 返回排序后的物品ID列表
     return [item_id for item_id, _ in recommendations]
@@ -248,9 +248,10 @@ def usercf(request):
     # 构建用户-物品交互矩阵等
     user_item_matrix, item_dict, user_dict = usercf_.build_user_item_matrix(question_list)
     user_similarity_matrix = usercf_.calculate_user_similarity(user_item_matrix)
+    #print(user_similarity_matrix,user_similarity_matrix.shape)
     #print(user_similarity_matrix)
     # 生成推荐列表
-    recommendations = usercf_.generate_recommendations(current_user_id, user_similarity_matrix, user_item_matrix, user_dict, item_dict, k=8)
+    recommendations = usercf_.generate_recommendations(current_user_id, user_similarity_matrix, user_item_matrix, user_dict, item_dict, k=40)
     # 获取推荐的电影信息
     recommended_movies = Question.objects.filter(id__in=recommendations[:8]) #只展示前五个
 

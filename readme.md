@@ -25,3 +25,18 @@ django.setup()
 
 3/12  实现了itemcf,效果肯定是比usercf好。
 
+
+
+# 大致推荐框架
+
+## 召回部分:
+
+distillbert分析Mod描述部分(基于事实) + 物品协同过滤(用户协助)  
+
+
+
+## 排序部分：
+
+DeepFM
+
+

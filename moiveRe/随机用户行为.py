@@ -3,7 +3,6 @@ import string
 
 from django.db import transaction
 import os
-
 import django
 from django.conf import settings
 

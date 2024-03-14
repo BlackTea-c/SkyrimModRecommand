@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skyrim Mod - Mod推荐</title>
+    <title>Skyrim Mod - 随机Mod推荐</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
@@ -30,14 +30,6 @@
             font-size: 16px;
         }
 
-        .sort-link {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            color: #fff;
-            font-size: 16px;
-        }
-
         ul {
             list-style: none;
             padding: 0;
@@ -57,7 +49,6 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             overflow: hidden;
             transition: transform 0.3s ease;
-            position: relative;
         }
 
         li:hover {
@@ -87,36 +78,36 @@
             overflow: hidden;
             font-size: 18px;
             font-weight: bold;
-            color: #fff;
+            color: #fff; /* 设置question_text为白色 */
         }
 
         p.tags {
             margin: 0;
             padding: 5px;
-            font-size: 12px;
+            font-size: 12px; /* 调小标签文字大小 */
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
         span.tag-item {
-            background-color: #3498db;
-            color: #fff;
-            border-radius: 5px;
-            padding: 3px 8px;
-            margin: 2px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background-color: #3498db; /* 标签框填充颜色 */
+            color: #fff; /* 白色文字 */
+            border-radius: 5px; /* 圆角框 */
+            padding: 3px 8px; /* 调整内边距 */
+            margin: 2px; /* 调整外边距 */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
         }
 
         p.detail {
             margin: 0;
             padding: 5px;
             display: -webkit-box;
-            -webkit-line-clamp: 3;
+            -webkit-line-clamp: 3; /* 设置显示的最大行数 */
             -webkit-box-orient: vertical;
             overflow: hidden;
-            font-size: 8px;
-            color: #fff;
+            font-size: 8px; /* 进一步调小detail的字体大小 */
+            color: #fff; /* 设置detail为白色 */
         }
 
         .rating {
@@ -137,9 +128,9 @@
             padding: 5px;
             font-size: 12px;
             color: #95a5a6;
-        }
 
-        .like-button {
+        }
+         .like-button {
             position: absolute;
             bottom: 10px;
             right: 10px;
@@ -186,23 +177,12 @@
         {% if user.is_authenticated %}
             <div class="user-info">Welcome, {{ user.username }}!</div>
         {% endif %}
-        <div class="sort-link">
-            <a href="{% url 'moiveReApp:random_questions' %}">
-                <i class="fas fa-random"></i> Random Sort
-
-            </a>
-            <a href="{% url 'moiveReApp:usercf' %}">
-               <i class="fas fa-random"></i> UserCF Sort
-            </a>
-
-            <a href="{% url 'moiveReApp:itemcf' %}">
-               <i class="fas fa-random"></i> ItemCF Sort
-            </a>
-        </div>
     </div>
 
+    <h1>ItemCF推荐</h1>
+
     <ul>
-        {% for question in latest_question_list %}
+        {% for question in recommended_movies %}
             <li>
                 <a href="{% url 'moiveReApp:question_detail' question.id %}">
                     <img src="{% if question.img_url %}{{ question.img_url }}{% else %}{{ question.img.url }}{% endif %}" alt="Image">
@@ -217,7 +197,6 @@
                         {{ question.avg_rating|default:5|floatformat:1 }}/5
                     </div>
                     <p class="pub-date">发布日期: {{ question.pub_date|date:"F d, Y" }}</p>
-
                     <form action="{% url 'moiveReApp:like_question' question.id %}" method="post">
                         {% csrf_token %}
                         <button type="submit" class="like-button">
@@ -233,7 +212,7 @@
             </li>
         {% endfor %}
     </ul>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function () {
             $('.like-button').click(function () {

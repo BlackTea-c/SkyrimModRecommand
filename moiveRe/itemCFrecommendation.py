@@ -73,7 +73,7 @@ class itemcf():
     def calculate_user_similarity(user_item_matrix):
         # 计算物品相似度矩阵
         item_similarity_matrix = cosine_similarity(user_item_matrix.T) #转置才是物品-用户表
-        np.fill_diagonal(user_similarity_matrix, 0)
+        np.fill_diagonal(item_similarity_matrix, 0)
         return item_similarity_matrix
 
     def generate_recommendations(target_user, item_similarity_matrix, user_item_matrix, user_dict, item_dict, k):
@@ -90,26 +90,28 @@ class itemcf():
             # 初始化推荐列表
             recommendations = []
 
-            # 获取与目标物品最相似的前K个物品的索引
-            similar_item_indices = np.argsort(item_similarity_matrix[target_user_index])[::-1][:k]
 
             # 遍历每个物品，计算目标用户对未交互物品的感兴趣程度
             for item_id, item_index in item_dict.items():
                 if not target_user_interactions[item_index]:
                     # 目标用户未交互过该物品
                     interest_score = 0
+                    # 获取与目标物品最相似的前K个物品的索引
+                    similar_item_indices = np.argsort(item_similarity_matrix[item_index])[::-1][:k]
 
                     # 计算目标用户对该物品的感兴趣程度
-                    for similar_user_index in similar_item_indices:
-                        if user_item_matrix[similar_user_index, item_index] == 1:
-                            # 该相似用户交互过该物品
-                            similarity_score = item_similarity_matrix[target_user_index, similar_user_index]
+                    for similar_item_index in similar_item_indices:
+                        if user_item_matrix[target_user_index, similar_item_index] == 1:
+                            # 用户u交互过该物品,此即为N(u)∩S（j,k）
+                            similarity_score = item_similarity_matrix[item_index, similar_item_index]
                             interest_score += similarity_score
 
                     recommendations.append((item_id, interest_score))
 
             # 根据感兴趣程度排序推荐列表
             recommendations.sort(key=lambda x: x[1], reverse=True)
+            print(recommendations)
+
 
             # 返回排序后的物品ID列表
             return [item_id for item_id, _ in recommendations]
@@ -118,15 +120,5 @@ class itemcf():
 
 
 
-
-question_list=Question.objects.all()
-
-user_item_matrix, item_dict, user_dict = itemcf.build_user_item_matrix(question_list)
-
-user_similarity_matrix = itemcf.calculate_user_similarity(user_item_matrix)
-
-print(user_item_matrix.T[0],user_item_matrix.T[1])
-
-print(user_similarity_matrix)
 
 

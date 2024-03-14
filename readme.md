@@ -24,3 +24,4 @@ django.setup()
 3/11  实现了Usercf并且实时更新。
 
 3/12  实现了itemcf,效果肯定是比usercf好。
+

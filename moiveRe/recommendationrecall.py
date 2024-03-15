@@ -117,6 +117,18 @@ class itemcf():
             return [item_id for item_id, _ in recommendations]
 
 
+class hotitem():
+
+
+    def recall_hot_item(question_list,k):
+        sorted_question_list = sorted(question_list, key=lambda q: q.likes, reverse=True)
+
+        return sorted_question_list[:k]
+
+
+
+
+
 
 
 

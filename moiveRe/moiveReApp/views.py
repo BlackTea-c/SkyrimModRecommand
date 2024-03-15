@@ -411,4 +411,3 @@ def bertcall(request):
 
     # 在模板中渲染推荐结果
     return render(request, 'moiveReApp/bertcall.html', {'recommended_movies': recommended_movies})
-

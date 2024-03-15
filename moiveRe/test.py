@@ -57,6 +57,6 @@ similarity_matrix += similarity_matrix.T - np.diag(similarity_matrix.diagonal())
 print("相似度矩阵：")
 print(similarity_matrix)
 
-# 保存相似度矩阵为.npy文件   计算很快。
+# 保存相似度矩阵为.npy文件
 np.save('similarity_matrix.npy', similarity_matrix)
 

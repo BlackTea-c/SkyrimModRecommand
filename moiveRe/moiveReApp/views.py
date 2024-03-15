@@ -370,6 +370,9 @@ def itemcf(request):
     # 构建用户-物品交互矩阵等
     user_item_matrix, item_dict, user_dict = itemcf_.build_user_item_matrix(question_list)
     item_similarity_matrix = itemcf_.calculate_user_similarity(user_item_matrix)
+    bert_similarity_matrix = np.load('similarity_matrix.npy')
+
+
     #print(user_similarity_matrix,user_similarity_matrix.shape)
     #print(user_similarity_matrix)
     # 生成推荐列表
@@ -381,4 +384,31 @@ def itemcf(request):
     return render(request, 'moiveReApp/itemcf.html', {'recommended_movies': recommended_movies})
 
 
+
+def bertcall(request):
+    # 获取当前登录用户\
+    current_user_id = request.user.id  # 假设你使用了Django的认证系统
+
+    # 获取问题列表
+    question_list = Question.objects.all()
+
+    # 构建用户-物品交互矩阵等
+    user_item_matrix, item_dict, user_dict = itemcf_.build_user_item_matrix(question_list)
+    item_similarity_matrix = itemcf_.calculate_user_similarity(user_item_matrix)
+    bert_similarity_matrix = np.load('similarity_matrix.npy')
+
+    # 设置权重
+    weight_item = 0.4
+    weight_bert = 0.6
+
+    # 对相似度矩阵进行加权求和
+    weighted_similarity_matrix = weight_item * item_similarity_matrix + weight_bert * bert_similarity_matrix
+
+    # 生成推荐列表
+    recommendations = itemcf_.generate_recommendations(current_user_id,weighted_similarity_matrix, user_item_matrix, user_dict, item_dict, k=40)
+    # 获取推荐的电影信息
+    recommended_movies = Question.objects.filter(id__in=recommendations[:8]) #只展示前ki个
+
+    # 在模板中渲染推荐结果
+    return render(request, 'moiveReApp/bertcall.html', {'recommended_movies': recommended_movies})
 

@@ -3,7 +3,7 @@ from django.views import generic
 from .forms import RatingForm
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from .models import Question, Rating
+from .models import Question, Rating ,UserProfile,Userinterests
 import random
 from django.contrib.auth.decorators import login_required
 #from recsystem.userCFrecommendation import usercf
@@ -13,6 +13,7 @@ from django.shortcuts import render, redirect
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import math
+from collections import Counter
 
 class IndexView(generic.ListView):
     template_name = "moiveReApp/index.html"
@@ -262,11 +263,43 @@ class itemcf_():
             # 返回排序后的物品ID列表
             return [item_id for item_id, _ in recommendations]
 # ...
+
+#兴趣标签更新
+def update_uesrinterests(user_profile):
+    # 获取用户喜欢和点击的物品类别
+    liked_categories = [question.category for question in user_profile.liked_items.all()]
+    clicked_categories = [question.category for question in user_profile.click_items.all()]
+    all_categories = liked_categories + clicked_categories
+    # 计算频率
+    category_counter = Counter(all_categories)
+
+    # 根据一定的规则选择兴趣标签;这里我暂时就设置阈值
+    threshold = 4
+    interests = []
+    for category, count in category_counter.items():
+        # 这里可以根据你的规则选择兴趣标签，比如出现频率大于阈值的类别
+        if count >= threshold:
+            interests.append(category)
+
+    # 将选定的兴趣标签添加到用户的兴趣标签列表中
+    #user_profile.interests.clear()  # 清除旧标签保持时效性
+    #print(interests)
+
+    for interest in interests:
+        user_interest, created = Userinterests.objects.get_or_create(name=interest)
+        user_profile.interests.add(user_interest)
+
+
+
 def question_detail(request, question_id):
+    user_profile = UserProfile.get_user_profile(request.user)
     question = get_object_or_404(Question, pk=question_id)
     ratings = Rating.objects.filter(question=question)
     avg_rating = ratings.aggregate(Avg('value'))['value__avg']
     form = RatingForm()
+    user_profile.click_items.add(question)
+    question.clicks+=1
+    update_uesrinterests(user_profile)
 
     if request.method == 'POST':
         form = RatingForm(request.POST)
@@ -318,17 +351,23 @@ def random_questions(request):
 
 @login_required
 def like_question(request, question_id):
+    user_profile = UserProfile.get_user_profile(request.user)
+
     question = get_object_or_404(Question, id=question_id)
 
     if request.user in question.liked_by.all():
         # 用户已经点过赞，取消点赞
         question.liked_by.remove(request.user)
+        user_profile.liked_items.remove(question)
+        update_uesrinterests(user_profile)
         if question.likes>0:
            question.likes-=1
     else:
         # 用户还未点赞，添加点赞
         question.liked_by.add(request.user)
+        user_profile.liked_items.add(question)
         question.likes += 1
+        update_uesrinterests(user_profile)
 
     question.save()
 

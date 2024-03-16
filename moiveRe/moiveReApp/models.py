@@ -7,6 +7,7 @@ import datetime
 from django.utils import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import User
+from datetime import datetime, timedelta
 
 class Tag(models.Model):
     name = models.CharField(max_length=200)
@@ -27,6 +28,7 @@ class Question(models.Model):
 
     likes = models.PositiveIntegerField(default=0)
     liked_by = models.ManyToManyField(User, blank=True, related_name='liked_questions')
+    clicks = models.PositiveIntegerField(default=0)
     def __str__(self):
         return f"{self.question_text} - {self.img.url}"
 
@@ -58,6 +60,33 @@ class Rating(models.Model):
 
     def __str__(self):
         return f"{self.question.question_text} - {self.value}"
+
+
+class Userinterests(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+class UserProfile(models.Model):
+    # 与用户关联的一对一字段，这里假设你使用了Django内置的User模型
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    interests = models.ManyToManyField(Userinterests, related_name='interested_users')
+    liked_items = models.ManyToManyField(Question, blank=True, related_name='liked_users')
+    click_items = models.ManyToManyField(Question, blank=True, related_name='clicked_users')
+
+
+    def __str__(self):
+        return self.user.username + "'s Profile"
+
+    @classmethod
+    def get_user_profile(cls, user):
+        # 根据用户获取或创建用户资料
+        user_profile, created = cls.objects.get_or_create(user=user)
+        return user_profile
+
+
 
 
 

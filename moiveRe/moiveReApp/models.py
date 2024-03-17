@@ -68,10 +68,19 @@ class Userinterests(models.Model):
     def __str__(self):
         return self.name
 
+class UserExperience(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+
 
 class UserProfile(models.Model):
     # 与用户关联的一对一字段，这里假设你使用了Django内置的User模型
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    userExperience = models.ManyToManyField(UserExperience, related_name='user_experience')
     interests = models.ManyToManyField(Userinterests, related_name='interested_users')
     liked_items = models.ManyToManyField(Question, blank=True, related_name='liked_users')
     click_items = models.ManyToManyField(Question, blank=True, related_name='clicked_users')

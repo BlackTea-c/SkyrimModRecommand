@@ -20,7 +20,7 @@ from moiveReApp.models import UserProfile,Question
 from django.contrib.auth.models import User
 
 
-user = User.objects.get(username='gly233')
+user = User.objects.get(username='gege')
 user_profile = UserProfile.get_user_profile(user)
 question_list = Question.objects.all()
 
@@ -129,28 +129,34 @@ class itemcf():
 
 user_item_matrix, item_dict, user_dict = itemcf.build_user_item_matrix(question_list)
 item_similarity_matrix = itemcf.calculate_user_similarity(user_item_matrix)
-r1 = itemcf.generate_recommendations(user.id, item_similarity_matrix, user_item_matrix, user_dict, item_dict, k=30)[:10]
+r1 = itemcf.generate_recommendations(user.id, item_similarity_matrix, user_item_matrix, user_dict, item_dict, k=30)
+
+# 获取用户已经喜欢的物品的列表
+liked_items = list(user_profile.liked_items.values_list('id', flat=True))
+print(liked_items)
+#print(len(liked_items),liked_items)
 
 
 class hotitem():
 
 
-    def recall_hot_item(question_list,k):
+    def recall_hot_item(question_list):
         sorted_question_list = sorted(question_list, key=lambda q: q.likes, reverse=True)
-        recommendations = [question.id for question in sorted_question_list]
-        return recommendations[:k]
+        recommendations = [(question.id, question.likes) for question in sorted_question_list]
+        return recommendations
 
-r2 = hotitem.recall_hot_item(question_list,10)
+r2 = hotitem.recall_hot_item(question_list)
+r2 = [item for item in r2 if item[0] not in liked_items]
 
 class newitem():
-
-    def recall_new_item(question_list,k):
+    @staticmethod
+    def recall_new_item(question_list):
         sorted_question_list = sorted(question_list, key=lambda q: q.pub_date, reverse=True)
-        recommendations = [question.id for question in sorted_question_list]
-        return recommendations[:k]
+        recommendations = [(question.id, 1) for question in sorted_question_list]  #得分为1 不带偏见的推荐新物品~
+        return recommendations
 
-r3 = newitem.recall_new_item(question_list,10)
-
+r3 = newitem.recall_new_item(question_list)
+r3 = [item for item in r3 if item[0] not in liked_items]
 
 class U2TAG2I():
 
@@ -211,14 +217,15 @@ class U2TAG2I():
 
         return interest_score
 
-    def generate_recommendations(score1,score2,k):
+    def generate_recommendations(score1,score2):
             result_dict = {}
             for key in score1:
                 if key in score2:
                     result_dict[key] = score1[key] + score2[key]
 
             sorted_items = sorted(result_dict.items(), key=lambda x: x[1], reverse=True)
-            top_k = sorted_items[:k]
+            top_k = sorted_items
+
             return top_k
 
 
@@ -226,15 +233,36 @@ class U2TAG2I():
 a=U2TAG2I.compute_interest_score(user_profile,questions=question_list)
 b=U2TAG2I.compute_similarity(user_profile,questions=question_list)
 
-r4 = U2TAG2I.generate_recommendations(a,b,10)
+r4 = U2TAG2I.generate_recommendations(a,b)
+r4 = [item for item in r4 if item[0] not in liked_items]
 
 
-
+'''
 print(r1)
 print(r2)
 print(r3)
 print(r4)
+'''
 
+# 获取每个类别前 10 个物品的 ID，去除重复项
+top_10_ids = list(set([item[0] for item in r1[:10]] + [item[0] for item in r2[:10]] + [item[0] for item in r3[:10]] + [item[0] for item in r4[:10]]))
+#print(top_10_ids)
+# 根据 top_10_ids 从 r1, r2, r3, r4 中找到对应的得分
+result = []
+for item_id in top_10_ids:
+    score1 = next((item[1] for item in r1 if item[0] == item_id), None)
+    score2 = next((item[1] for item in r2 if item[0] == item_id), None)
+    score3 = next((item[1] for item in r3 if item[0] == item_id), None)
+    score4 = next((item[1] for item in r4 if item[0] == item_id), None)
+    result.append((item_id, score1, score2, score3, score4))
+
+
+import pandas as pd
+df = pd.DataFrame(result, columns=['id', 'feature1', 'feature2', 'feature3', 'feature4'])
+
+# 输出 DataFrame
+print(df)
+df.to_csv('test_data.csv', index=False)
 
 
 

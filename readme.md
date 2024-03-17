@@ -9,33 +9,53 @@
 具体操作代码看django。
 
 
-3/7 成功爬取了100多组数据，期间有个问题就是
-设置环境变量，指向你的Django项目的settings模块
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'moiveRe.settings')
-配置Django
-django.setup()
-
-这个一直报错找不到moiveRe.settings
-
-原因是一定要把py文件放在moiveRe根目录下面。要不就识别不到。
+# 废话不多说先上效果图
+![主界面](主页面.png)
+![推荐❤](推荐页面.png)
 
 
 
-3/11  实现了Usercf并且实时更新。
 
-3/12  实现了itemcf,效果肯定是比usercf好。
+# 使用提示
+终端python manage.py runsever即可，进入对应网页
 
 
 
 # 大致推荐框架
 
 ## 召回部分:
-多路召回
-
+实行多路召回 一共四路:
+1.用户兴趣标签
+2.协同过滤
+3.物品新颖度
+4.物品热度/流行度
 
 
 ## 排序部分：
 
-DeepFM
+将召回部分得到的总召回，以其对应的4中特征值标准化处理后进入DeepFM中进行CTR预测，根据预测值得到最终排序
+再通过用户对推荐内容的反馈对其生成标签产生训练数据从而针对不同用户个性化地训练了DeepFM。
 
 
+
+# 测试效果
+
+因为是本地自己测试，我就爬了N网上200多个物品，然后自己根据推荐结果来挑，意外还不错，我是比较喜欢动画替换之类的，而且是华丽地战斗动画，反复训练几次
+后还是每轮都给我推荐到了
+
+数据太少就没做评估了，这个项目主要还是全流程地从前端开始一步一步完成各个框架，最后效果还可以，收获也挺大
+
+
+
+
+
+
+
+
+一些废话：
+设置环境变量，指向你的Django项目的settings模块
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'moiveRe.settings')
+配置Django
+django.setup()
+这个一直报错找不到moiveRe.settings
+原因是一定要把py文件放在moiveRe根目录下面。要不就识别不到。
